@@ -1,2 +1,5 @@
 # Node Package
 node_modules/
+
+# VS Code
+.vscode/
