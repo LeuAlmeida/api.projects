@@ -14,3 +14,6 @@ Fará com que server (função importada através do express) ouça a porta 3000
 
 ### O nodemon serve para atualizar automaticamente a aplicação, quando for salva.
 `yarn add nodemon -D` para instalar a dependência apenas no ambiente de desenvolvimento
+
+### server.use(express.json())
+Para autorizar o uso de dados *.json* pelo epxress
