@@ -66,13 +66,20 @@ server.delete('/projects/:id', checkUserId, (req, res) => {
 });
 
 
-server.post('/projects/:id/tasks', (req, res) => {
+// [ ] POST /projects/:id/tasks: 
+// A rota deve receber um campo title 
+// E armazenar uma nova tarefa no array de tarefas de um projeto específico 
+// Escolhido através do id presente nos parâmetros da rota;
+
+server.post('/projects/:id/tasks', checkUserId, (req, res) => {
   const { id } = req.params;
-  const { tasks } = req.body;
+  const { newTask } = req.body;
 
-  projects.push();
+  const project = projects.find(proj => proj.id == id);
 
-  return res.json();
+  project.tasks.push(newTask);
+
+  return res.json(projects);
 
 });
 
