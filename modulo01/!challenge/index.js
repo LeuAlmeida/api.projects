@@ -9,9 +9,6 @@ const projects = [];
 ////////////////////////////////// MIDDLEWARES /////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// Crie um middleware que será utilizado em todas rotas que recebem o ID do projeto nos parâmetros da URL que verifica se o projeto com aquele ID existe. 
-// Se não existir retorne um erro, caso contrário permita a requisição continuar normalmente;
-
 function checkUserId(req, res, next) {
   const { id } = req.params;
   const project = projects.find(proj => proj.id == id);
@@ -23,7 +20,17 @@ function checkUserId(req, res, next) {
   return next();
 }
 
+// [ ] Crie um middleware global chamado em todas requisições que imprime (console.log) uma contagem de quantas requisições foram feitas na aplicação até então;
 
+server.use((req, res, next) => {
+  console.time('Request');
+  
+  
+
+  next();
+
+  console.timeEnd('Request');
+});
 
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////// ROUTES ///////////////////////////////////
@@ -66,11 +73,6 @@ server.delete('/projects/:id', checkUserId, (req, res) => {
 });
 
 
-// [ ] POST /projects/:id/tasks: 
-// A rota deve receber um campo title 
-// E armazenar uma nova tarefa no array de tarefas de um projeto específico 
-// Escolhido através do id presente nos parâmetros da rota;
-
 server.post('/projects/:id/tasks', checkUserId, (req, res) => {
   const { id } = req.params;
   const { newTask } = req.body;
@@ -100,7 +102,7 @@ server.listen(3000);
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // [X] DELETE /projects/:id: A rota deve deletar o projeto com o id presente nos parâmetros da rota;
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// [ ] POST /projects/:id/tasks: A rota deve receber um campo title e armazenar uma nova tarefa no array de tarefas de um projeto específico escolhido através do id presente nos parâmetros da rota;
+// [X] POST /projects/:id/tasks: A rota deve receber um campo title e armazenar uma nova tarefa no array de tarefas de um projeto específico escolhido através do id presente nos parâmetros da rota;
 
 
 ////////////////////////////////////////  EXEMPLO  ///////////////////////////////////////////////
