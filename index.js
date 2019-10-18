@@ -1,84 +1,126 @@
-const express = require('express');
-
+const express = require('express')
 const server = express();
 
 server.use(express.json());
 
-// Query params = ?teste=1
-// Route params = /users/1
-// Request body = { "name": "Diego", "email": "diego@rocketseat.com.br" }
+let numberOfRequests = 0;
+const projects = [];
 
-// CRUD - Create, Read, Update, Delete
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////// MIDDLEWARES /////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-const users = ['Leonardo', 'Cláudio', 'Victor'];
+function checkUserId(req, res, next) {
+  const { id } = req.params;
+  const project = projects.find(proj => proj.id == id);
 
-// Midleware de Log
-server.use((req, res, next) => {
-  console.time('Request');
-  console.log(`Método; ${req.method}; URL: ${req.url}`);
-
-  next();
-
-  console.timeEnd('Request');
-});
-
-// Midleware de verificação do usuário
-function chekUserExists(req, res, next) {
-  if (!req.body.name) {
-    return res.status(400).json({ error: 'User name is required.' });
+  if (!project) {
+    return res.status(400).json({ error: 'This project does not exist.'})
   }
 
   return next();
-};
+}
 
-function checkUserInArray(req, res, next) {
-  const user = users[req.params.index];
+function logReq(req, res, next) {
+  numberOfRequests++;
 
-  if (!user) {
-    return res.status(400).json({ error: 'User does not exists '});
-  }
-
-  req.user = user;
+  console.log(`Número de requisições: ${numberOfRequests}`);
 
   return next();
-};
+}
 
-// Rota para consulta de todos os usuários
-server.get('/users', (req, res) => {
-  return res.json(users);
+server.use(logReq);
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////// ROUTES ///////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+server.post('/projects', (req, res) => {
+  const { id, title, tasks } = req.body;
+
+  projects.push({id, title, tasks});
+
+  return res.json(projects)
 });
 
-// Rota para consulta de um único usuário, através do index
-server.get('/users/:index', checkUserInArray, (req, res) => {
-  return res.json(req.user);
+
+server.get('/projects', (req, res) => {
+  return res.json(projects)
 });
 
-// Rota para cadastro de um usuário
-server.post('/users', chekUserExists, (req, res) => {
-  const { name } = req.body;
 
-  users.push(name);
+server.put('/projects/:id', checkUserId, (req, res) => {
+  const { id } = req.params;
+  const { title } = req.body;
 
-  return res.json(users);
+  const project = projects.find(proj => proj.id == id);
+
+  project.title = title;
+
+  return res.json(project);
 });
 
-// Rota para edição de um usuário, através do index
-server.put('/users/:index', checkUserInArray, chekUserExists, (req, res) => {
-  const { index } = req.params;
-  const { name } = req.body;
 
-  users[index] = name;
-
-  return res.json(users);
-});
-
-// Rota de remoção de um usuário, através do index usando .splice()
-server.delete('/users/:index', checkUserInArray, (req, res) => {
-  const { index } = req.params;
+server.delete('/projects/:id', checkUserId, (req, res) => {
+  const { id } = req.params;
   
-  users.splice(index, 1);
+  const projectIndex = projects.findIndex(proj => proj.id == id);
+
+  projects.splice(projectIndex, 1);
 
   return res.send();
 });
 
+
+server.post('/projects/:id/tasks', checkUserId, (req, res) => {
+  const { id } = req.params;
+  const { tasks } = req.body;
+
+  const project = projects.find(proj => proj.id == id);
+
+  project.tasks.push(tasks);
+
+  return res.json(projects);
+
+});
+
+
 server.listen(3000);
+
+///////////////////////////////////////  MÉTODOS HTTP  ///////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+// [X] POST /projects: 
+//A rota deve receber id e title dentro do corpo 
+//e cadastrar um novo projeto dentro de um array no seguinte formato: { id: "1", title: 'Novo projeto', tasks: [] }; 
+// Certifique-se de enviar tanto o ID quanto o título do projeto no formato string com aspas duplas.
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// [X] GET /projects: Rota que lista todos projetos e suas tarefas;
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// [X] PUT /projects/:id: A rota deve alterar apenas o título do projeto com o id presente nos parâmetros da rota;
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// [X] DELETE /projects/:id: A rota deve deletar o projeto com o id presente nos parâmetros da rota;
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// [X] POST /projects/:id/tasks: A rota deve receber um campo title e armazenar uma nova tarefa no array de tarefas de um projeto específico escolhido através do id presente nos parâmetros da rota;
+
+
+////////////////////////////////////////  EXEMPLO  ///////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Se eu chamar a rota POST /projects repassando { id: 1, title: 'Novo projeto' } e a rota POST /projects/1/tasks com { title: 'Nova tarefa' }, meu array de projetos deve ficar assim:
+//
+// [
+//   {
+//     id: "1",
+//     title: "Novo projeto",
+//     tasks: ["Nova tarefa"]
+//   }
+// ];
+
+
+//////////////////////////////////////  MIDDLEWARES  /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+// [X] Crie um middleware que será utilizado em todas rotas que recebem o ID do projeto nos parâmetros da URL que verifica se o projeto com aquele ID existe. Se não existir retorne um erro, caso contrário permita a requisição continuar normalmente;
+//
+// [X] Crie um middleware global chamado em todas requisições que imprime (console.log) uma contagem de quantas requisições foram feitas na aplicação até então;
