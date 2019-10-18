@@ -75,11 +75,11 @@ server.delete('/projects/:id', checkUserId, (req, res) => {
 
 server.post('/projects/:id/tasks', checkUserId, (req, res) => {
   const { id } = req.params;
-  const { newTask } = req.body;
+  const { task } = req.body;
 
   const project = projects.find(proj => proj.id == id);
 
-  project.tasks.push(newTask);
+  project.tasks.push(task);
 
   return res.json(projects);
 
