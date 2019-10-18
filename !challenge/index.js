@@ -3,6 +3,7 @@ const server = express();
 
 server.use(express.json());
 
+let numberOfRequests = 0;
 const projects = [];
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -22,15 +23,15 @@ function checkUserId(req, res, next) {
 
 // [ ] Crie um middleware global chamado em todas requisições que imprime (console.log) uma contagem de quantas requisições foram feitas na aplicação até então;
 
-server.use((req, res, next) => {
-  console.time('Request');
-  
-  
+function logReq(req, res, next) {
+  numberOfRequests++;
 
-  next();
+  console.log(`Número de requisições: ${numberOfRequests}`);
 
-  console.timeEnd('Request');
-});
+  return next();
+}
+
+server.use(logReq);
 
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////// ROUTES ///////////////////////////////////
@@ -75,11 +76,11 @@ server.delete('/projects/:id', checkUserId, (req, res) => {
 
 server.post('/projects/:id/tasks', checkUserId, (req, res) => {
   const { id } = req.params;
-  const { task } = req.body;
+  const { tasks } = req.body;
 
   const project = projects.find(proj => proj.id == id);
 
-  project.tasks.push(task);
+  project.tasks.push(tasks);
 
   return res.json(projects);
 
