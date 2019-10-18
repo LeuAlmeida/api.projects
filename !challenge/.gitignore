@@ -1,2 +1,5 @@
 # Ignore notes about this challenge
 NOTES.md
+
+# Ignore all dependencies
+node_modules/
